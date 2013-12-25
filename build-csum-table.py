@@ -11,7 +11,7 @@ def hashfile(file, hasher, blksz=65536):
         buf = file.read(blksz)
     return hasher.digest()
 
-def populate_flist():
+def populate_flist(extension=''):
     flist = []
     for root, dirs, files in os.walk("."):
         for file in files:
@@ -37,11 +37,34 @@ def handle_clist(clist=[]):
         f.write(s)
         f.close()
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--resetdb', 
+                        action='store_true',
+                        help='reset checksum database files')
+    parser.add_argument('--ext',
+                        help='file extension to target')
+    args = parser.parse_args()
+    return args
+
+def resetdb():
+    for root, dirs, files in os.walk('.'):
+        for file in files:
+            if file.endswith(cksumfile):
+                os.remove(os.path.join(root,file))
+
+def handle_args(args):
+    if vars(args)['resetdb'] is True:
+        resetdb()
+    if vars(args)['ext'] is not None:
+        flist = populate_flist(vars(args)['ext'])
+        clist = flist_to_clist(flist)
+        handle_clist(clist)
+
 
 cksumfile='.cksum'
-extension='.JPG'
-flist = populate_flist()
-clist = flist_to_clist(flist)
-handle_clist(clist)
+
+args = parse_args()
+handle_args(args)
 
 
