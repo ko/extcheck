@@ -44,6 +44,12 @@ def parse_args():
                         help='reset checksum database files')
     parser.add_argument('--ext',
                         help='file extension to target')
+    parser.add_argument('--verify',
+                        action='store_true',
+                        help='verify files and stored checksums')
+    parser.add_argument('--list',
+                        action='store_true',
+                        help='list checksum db contents')
     args = parser.parse_args()
     return args
 
