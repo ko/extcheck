@@ -3,6 +3,7 @@
 import hashlib
 import os
 import argparse
+import csv
 
 def hashfile(file, hasher, blksz=65536):
     buf = file.read(blksz)
@@ -59,9 +60,41 @@ def resetdb():
             if file.endswith(cksumfile):
                 os.remove(os.path.join(root,file))
 
+def verify_line(line):
+    print line
+
+def list_cksumfile(path):
+    # 1. open cksum file 
+    # 2. read contents
+    # 3. md5sum files if files exist
+    # 4. return array of invalid or corrupt files
+    with open(path, 'rb') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            verify_line(row)
+
+def verify_cksumfile(path):
+    print path
+
+def verifydb():
+    for root, dirs, files in os.walk('.'):
+        for file in files:
+            if file.endswith(cksumfile):
+                verify_cksumfile(os.path.join(root,file))
+
+def listdb():
+    for root, dirs, files in os.walk('.'):
+        for file in files:
+            if file.endswith(cksumfile):
+                list_cksumfile(os.path.join(root,file))
+ 
 def handle_args(args):
     if vars(args)['resetdb'] is True:
         resetdb()
+    if vars(args)['list'] is True:
+        listdb()
+    if vars(args)['verify'] is True:
+        verifydb()
     if vars(args)['ext'] is not None:
         flist = populate_flist(vars(args)['ext'])
         clist = flist_to_clist(flist)
