@@ -60,7 +60,7 @@ def resetdb():
             if file.endswith(cksumfile):
                 os.remove(os.path.join(root,file))
 
-def verify_line(line):
+def list_line(line):
     print line
 
 def list_cksumfile(path):
@@ -71,10 +71,18 @@ def list_cksumfile(path):
     with open(path, 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
-            verify_line(row)
+            list_line(row)
+
+def verify_line(line):
+    filename = line[0]
+    checksum = line[1]
+    print checksum
 
 def verify_cksumfile(path):
-    print path
+    with open(path, 'rb') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            verify_line(row)
 
 def verifydb():
     for root, dirs, files in os.walk('.'):
