@@ -69,10 +69,6 @@ def list_cksumfile(path):
         for row in reader:
             list_line(row)
 
-# 1. open cksum file 
-# 2. read contents
-# 3. md5sum files if files exist
-# 4. return array of invalid or corrupt files
 def verify_line(line):
     flist = [line[0]]
     clist = flist_to_clist(flist)
@@ -105,14 +101,18 @@ def listdb():
 def handle_args(args):
     if vars(args)['resetdb'] is True:
         resetdb()
+        return
     if vars(args)['list'] is True:
         listdb()
+        return
     if vars(args)['verify'] is True:
         verifydb()
+        return
     if vars(args)['ext'] is not None:
         flist = populate_flist(vars(args)['ext'])
         clist = flist_to_clist(flist)
         handle_clist(clist)
+        return
 
 
 cksumfile='.cksum'
