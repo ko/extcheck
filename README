@@ -1,0 +1,20 @@
+# What it does
+In each subdirectory, create a ".cksum" file. Contents are CSV
+format as following:
+
+> file_name,checksum
+
+When verifying and a mismatch is found, the following tuple
+is returned (and printed, as of 2013-12-27):
+
+> file_name,checksum_in_table,checksum_just_calculated
+
+Save these to a local file at some later date.
+
+# Future TODO
+Multiple arguments allowed?
+* No
+** Not sensible (--verify --resetdb --list) 
+** Order matters? (--resetdb --verify vs. --verify --resetdb)
+* Yes
+** Saves time? (--resetdb --verify)
