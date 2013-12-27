@@ -64,25 +64,31 @@ def list_line(line):
     print line
 
 def list_cksumfile(path):
-    # 1. open cksum file 
-    # 2. read contents
-    # 3. md5sum files if files exist
-    # 4. return array of invalid or corrupt files
     with open(path, 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
             list_line(row)
 
+# 1. open cksum file 
+# 2. read contents
+# 3. md5sum files if files exist
+# 4. return array of invalid or corrupt files
 def verify_line(line):
-    filename = line[0]
-    checksum = line[1]
-    print checksum
+    flist = [line[0]]
+    clist = flist_to_clist(flist)
+    if line[1].lower() != clist[0][1].lower():
+        line.append(clist[0][1])
+        return line
+    else:
+        return None
 
 def verify_cksumfile(path):
     with open(path, 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
-            verify_line(row)
+            mismatch = verify_line(row) 
+            if mismatch is not None:
+                print mismatch
 
 def verifydb():
     for root, dirs, files in os.walk('.'):
