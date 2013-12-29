@@ -1,3 +1,5 @@
+# write to single csv
+# write to multiple csv
 def write_to_csv(outfile, list):
     if not list:
         return 0

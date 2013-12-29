@@ -21,11 +21,13 @@ def flist_to_clist(flist=[]):
     return [(fname, "".join('%02x' % ord(c) for c in hash_utils.hashfile(open(fname, 'rb'), hashlib.sha256()))) for fname in flist]
 
 
-def handle_clist(clist=[]):
+# TODO check for duplicates
+def write_clist_to_csv(clist=[]):
     for pair in clist:
         dirpath = os.path.dirname(pair[0])
         # TODO cksumfile per file
         cksum_file = os.path.join(dirpath,cksumfile)
+        # XXX complicates csv.writer?
         if (os.path.exists(cksum_file) == False):
             f = open(cksum_file, 'w')
         else:
@@ -33,12 +35,24 @@ def handle_clist(clist=[]):
         s = "%(name)s,%(csum)s\n" % {'name':pair[0], 'csum':pair[1]}
         f.write(s)
         f.close()
+    if False:
+        write_clist_to_csv_discrete(cksumdir, cksumext, clist)
+    return len(clist)
+
+def write_clist_to_csv_discrete(dir, ext, clist=[]):
+    if os.path.exists(dir) == False:
+        # mkdir
+    # cd dir
+    # foreach pair in clist; do echo $pair > $pair[0].$extension; done
+        return
+    return
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--resetdb', 
+    parser.add_argument('--rmdb', 
                         action='store_true',
-                        help='reset checksum database files')
+                        help='remove checksum database files')
     parser.add_argument('--ext',
                         help='file extension to target')
     parser.add_argument('--verify',
@@ -50,7 +64,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def resetdb():
+def rmdb():
     for root, dirs, files in os.walk('.'):
         for file in files:
             if file.endswith(cksumfile):
@@ -98,15 +112,18 @@ def printdb():
             if file.endswith(cksumfile):
                 print_cksumfile(os.path.join(root,file))
 
-def print_corrupt_notice(count):
+def print_verify_notice(count):
     fullpath = os.path.join(os.getcwd(),corruptlistfile) 
-    print '%(corrupt)s corrupt file(s) found' % {'corrupt':count}
+    print '%(count)s corrupt file(s) found' % {'count':count}
     if count is not 0:
         print 'for more details, check %(file)s' % {'file':fullpath}
 
+def print_ext_notice(count):
+    print '%(count)s files recorded' % {'count':count}
+
 def handle_args(args):
-    if vars(args)['resetdb'] is True:
-        resetdb()
+    if vars(args)['rmdb'] is True:
+        rmdb()
         return
     if vars(args)['list'] is True:
         printdb()
@@ -114,17 +131,20 @@ def handle_args(args):
     if vars(args)['verify'] is True:
         corrupt_list = verifydb()
         count = list_utils.write_to_csv(corruptlistfile, corrupt_list)
-        print_corrupt_notice(count)
+        print_verify_notice(count)
         return
     if vars(args)['ext'] is not None:
         flist = populate_flist(vars(args)['ext'])
         clist = flist_to_clist(flist)
-        handle_clist(clist)
+        count = write_clist_to_csv(clist)
+        print_ext_notice(count)
         return
 
 
 corruptlistfile='corrupt'
-cksumfile='.cksum'
+cksumfile   = '.cksum'
+cksumdir    = '.cksums'
+cksumext    = '.chk'
 
 args = parse_args()
 handle_args(args)
