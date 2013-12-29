@@ -19,3 +19,6 @@ Multiple arguments allowed?
 * Yes
 ** Saves time? (--resetdb --verify)
 
+Add dedup?
+
+Breakout script to multiple files
