@@ -22,3 +22,7 @@ Multiple arguments allowed?
 Add dedup?
 
 Breakout script to multiple files
+
+Checksums to be saved in multiple files
+* .cksums/$(file_name).cksum
+* Benefit being a corrupt .cksum will lose only 1 checksum, not all.
