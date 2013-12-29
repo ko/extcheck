@@ -9,7 +9,7 @@ is returned (and printed, as of 2013-12-27):
 
 > file_name,checksum_in_table,checksum_just_calculated
 
-Save these to a local file at some later date.
+The list of this tuple is written to disk for future reference.
 
 # Future TODO
 Multiple arguments allowed?
@@ -19,4 +19,3 @@ Multiple arguments allowed?
 * Yes
 ** Saves time? (--resetdb --verify)
 
-Write/append (file,cksum1,cksum2) tuple to current (calling) directory
