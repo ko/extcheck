@@ -72,6 +72,7 @@ def list_cksumfile(path):
 def verify_line(line):
     flist = [line[0]]
     clist = flist_to_clist(flist)
+    # NOTE: to debug, != to ==
     if line[1].lower() != clist[0][1].lower():
         line.append(clist[0][1])
         return line
@@ -79,18 +80,24 @@ def verify_line(line):
         return None
 
 def verify_cksumfile(path):
+    corrupt_list = []
     with open(path, 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
             mismatch = verify_line(row) 
             if mismatch is not None:
-                print mismatch
+                corrupt_list.append(mismatch)
+    return corrupt_list
 
 def verifydb():
+    corrupt_list = []
     for root, dirs, files in os.walk('.'):
         for file in files:
             if file.endswith(cksumfile):
-                verify_cksumfile(os.path.join(root,file))
+                corrupt = verify_cksumfile(os.path.join(root,file))
+                if corrupt:
+                    corrupt_list.extend(corrupt)
+    return corrupt_list
 
 def listdb():
     for root, dirs, files in os.walk('.'):
@@ -98,6 +105,20 @@ def listdb():
             if file.endswith(cksumfile):
                 list_cksumfile(os.path.join(root,file))
  
+def write_list_to_file(list):
+    if not list:
+        return 0
+    with open(corruptlistfile, 'wb') as f:
+        writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+        writer.writerows(list)
+    return len(list)
+            
+def print_corrupt_notice(count):
+    fullpath = os.path.join(os.getcwd(),corruptlistfile) 
+    print '%(corrupt)s corrupt file(s) found' % {'corrupt':count}
+    if count is not 0:
+        print 'for more details, check %(file)s' % {'file':fullpath}
+
 def handle_args(args):
     if vars(args)['resetdb'] is True:
         resetdb()
@@ -106,7 +127,9 @@ def handle_args(args):
         listdb()
         return
     if vars(args)['verify'] is True:
-        verifydb()
+        corrupt_list = verifydb()
+        count = write_list_to_file(corrupt_list)
+        print_corrupt_notice(count)
         return
     if vars(args)['ext'] is not None:
         flist = populate_flist(vars(args)['ext'])
@@ -115,6 +138,7 @@ def handle_args(args):
         return
 
 
+corruptlistfile='corrupt'
 cksumfile='.cksum'
 
 args = parse_args()
