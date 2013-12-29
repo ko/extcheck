@@ -18,3 +18,5 @@ Multiple arguments allowed?
 ** Order matters? (--resetdb --verify vs. --verify --resetdb)
 * Yes
 ** Saves time? (--resetdb --verify)
+
+Write/append (file,cksum1,cksum2) tuple to current (calling) directory
