@@ -5,12 +5,8 @@ import os
 import argparse
 import csv
 
-def hashfile(file, hasher, blksz=65536):
-    buf = file.read(blksz)
-    while len(buf) > 0:
-        hasher.update(buf)
-        buf = file.read(blksz)
-    return hasher.digest()
+import list_utils
+import hash_utils
 
 def populate_flist(extension=''):
     flist = []
@@ -22,7 +18,7 @@ def populate_flist(extension=''):
     return flist
 
 def flist_to_clist(flist=[]):
-    return [(fname, "".join('%02x' % ord(c) for c in hashfile(open(fname, 'rb'), hashlib.sha256()))) for fname in flist]
+    return [(fname, "".join('%02x' % ord(c) for c in hash_utils.hashfile(open(fname, 'rb'), hashlib.sha256()))) for fname in flist]
 
 
 def handle_clist(clist=[]):
@@ -60,14 +56,11 @@ def resetdb():
             if file.endswith(cksumfile):
                 os.remove(os.path.join(root,file))
 
-def list_line(line):
-    print line
-
-def list_cksumfile(path):
+def print_cksumfile(path):
     with open(path, 'rb') as f:
         reader = csv.reader(f)
         for row in reader:
-            list_line(row)
+            print row
 
 def verify_line(line):
     flist = [line[0]]
@@ -99,20 +92,12 @@ def verifydb():
                     corrupt_list.extend(corrupt)
     return corrupt_list
 
-def listdb():
+def printdb():
     for root, dirs, files in os.walk('.'):
         for file in files:
             if file.endswith(cksumfile):
-                list_cksumfile(os.path.join(root,file))
- 
-def write_list_to_file(list):
-    if not list:
-        return 0
-    with open(corruptlistfile, 'wb') as f:
-        writer = csv.writer(f, quoting=csv.QUOTE_ALL)
-        writer.writerows(list)
-    return len(list)
-            
+                print_cksumfile(os.path.join(root,file))
+
 def print_corrupt_notice(count):
     fullpath = os.path.join(os.getcwd(),corruptlistfile) 
     print '%(corrupt)s corrupt file(s) found' % {'corrupt':count}
@@ -124,11 +109,11 @@ def handle_args(args):
         resetdb()
         return
     if vars(args)['list'] is True:
-        listdb()
+        printdb()
         return
     if vars(args)['verify'] is True:
         corrupt_list = verifydb()
-        count = write_list_to_file(corrupt_list)
+        count = list_utils.write_to_csv(corruptlistfile, corrupt_list)
         print_corrupt_notice(count)
         return
     if vars(args)['ext'] is not None:
