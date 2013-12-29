@@ -20,8 +20,7 @@ Multiple arguments allowed?
 ** Saves time? (--resetdb --verify)
 
 Add dedup?
-
-Breakout script to multiple files
+* Maybe not.
 
 Checksums to be saved in multiple files
 * .cksums/$(file_name).cksum
