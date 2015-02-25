@@ -1,11 +1,20 @@
-var express = require('express')
-var fs = require('fs')
+var app = require('express')()
+var http = require('http').Server(app)
+var io = require('socket.io')(http)
 
-var app = express()
+var fs = require('fs')
 
 app.get('/', function(req,res) {
     var out = fs.readdirSync('/')
     res.send(out)
 })
 
-app.listen(3000)
+io.on('connection', function(socket) {
+
+    socket.on('ls', function(msg) {
+        console.log('ls!')
+        console.log(msg)
+    })
+})
+
+http.listen(3000)

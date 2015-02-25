@@ -1,4 +1,6 @@
 var React = require('react')
+var io = require('socket.io-client').connect('http://localhost:3000');
+var socket = io.connect();
 
 
 var Home = React.createClass({
@@ -25,6 +27,8 @@ var Home = React.createClass({
     render : function(){
 
         var output = this.test()
+
+        socket.emit('ls', 'file!')
 
         return (
             <div>
