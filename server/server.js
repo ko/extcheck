@@ -11,9 +11,26 @@ app.get('/', function(req,res) {
 
 io.on('connection', function(socket) {
 
-    socket.on('ls', function(msg) {
-        console.log('ls!')
-        console.log(msg)
+    socket.on('ls', function(filepath) {
+
+        var out = []
+        var isDir = fs.statSync(filepath).isDirectory()
+
+        if (isDir) {
+            out = fs.readdirSync(filepath)
+        }
+
+        console.log(out)
+
+        socket.emit('ls:return', { isDir: isDir,  filenames: out })
+    })
+
+    socket.on('browse', function(filepath) {
+        
+        var out = []
+        var isDir = fs.statSync(filepath).isDirectory()
+
+        socket.emit('browse:return', { isDir: isDir, filename: filepath })
     })
 })
 

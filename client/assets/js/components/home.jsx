@@ -2,40 +2,86 @@ var React = require('react')
 var io = require('socket.io-client').connect('http://localhost:3000');
 var socket = io.connect();
 
+var FileEntry = React.createClass({
+
+    render: function() {
+        return (
+            <li onClick={this.props.onClick}>
+                <b>
+                    {this.props.direntry}
+                </b>
+            </li>
+        )
+    }
+})
 
 var Home = React.createClass({
 
-    test: function() {
-        if (window.File && window.FileReader && window.FileList && window.Blob) {
-            // Great success! All the File APIs are supported.
+    getInitialState: function() {
 
-            return "true"
-        } else {
-            alert('The File APIs are not fully supported in this browser.');
+        socket.on('ls:return', this.lsReturn) 
+        socket.on('browse:return', this.browseReturn)
+
+        this.initialize()
+
+        return { dircontents: [], dirpath: '', filepath: ''}
+    },
+
+    initialize: function() {
+        this.setState({ dirpath: '/' })
+        this.setState({ filepath: '/' })
+        this.ls('')
+    },
+
+    ls: function(filename) {
+        var basepath = ''
+
+        if (this.state && this.state.filepath) {
+            basepath = this.state.filepath
+        }
+        socket.emit('ls', basepath + '/' + filename)
+    },
+
+    lsReturn: function(msg) {
+        if (msg.isDir) {
+            this.setState({ dircontents: msg.filenames })
         }
     },
 
-    tester: function(evt) {
-        var files = evt.target.files;
-        var output = []
-        for (var i = 0, f; f = files[i]; i++) {
-            output.push('<li><strong>', escape(f.name), '</strong></li>')
+    browseReturn: function(msg) {
+        console.log('browseReturn: ' + msg.filename)
+
+        if (msg.isDir) {
+            var newDirpath = msg.filename
+
+            this.setState({ dirpath: newDirpath })
+            this.ls(newDirpath)
         }
-        document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>'
+    },
+
+    onFileClick: function(i) {
+
+        var newPath = ''
+
+        if (this.state.dirpath) {
+            newPath = this.state.dirpath
+        }
+        if (newPath === '/') {
+            newPath = ''
+        }
+        newPath +=  '/' + this.state.dircontents[i]
+
+        socket.emit('browse', newPath)
     },
 
     render : function(){
 
-        var output = this.test()
-
-        socket.emit('ls', 'file!')
-
         return (
-            <div>
-                {output}
-                <input type="file" id="files" name="files[]" multiple onChange={this.tester} />
-                <output id="list"></output>
-            </div>
+            <ul>
+                {this.state.dircontents.map(function(result, i) {
+                    return <FileEntry onClick={this.onFileClick.bind(this,i)} key={i} direntry={result} />
+                }, this)}
+            </ul>
         );
     }
 
